@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>محول العملات الذكي</title>
+    <style>
+        :root {
+            --primary: #00c9a7;
+            --secondary: #845ec2;
+            --background: #1a1e26;
+            --surface: #2d3243;
+            --text: #e6f4f1;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --glass-bg: rgba(45, 50, 67, 0.25);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --background: #f5f7fb;
+            --surface: #ffffff;
+            --text: #1a1e26;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            transition: color var(--transition-speed), background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            overflow: hidden; /* Prevent scrolling */
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        .glass-effect {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all var(--transition-speed) ease-in-out;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        
+        .top-content {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 16px;
+        }
+
+        .flag-top {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .random-message {
+            font-size: 1.em;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 6px rgba(0, 201, 167, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.2em;
+            color: var(--primary);
+            text-shadow: 0 0 15px rgba(0, 201, 167, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .converter-box {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .currency-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 15px; /* Smaller padding */
+            border: none;
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9em; /* Smaller font size */
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.5em;
+            text-align: center;
+            background: var(--surface);
+            border: none;
+            border-radius: 10px;
+            color: var(--text);
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .virtual-keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .key-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .key-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .key-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--primary);
+            border-radius: 12px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            font-weight: bold;
+        }
+
+        .result-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 201, 167, 0.1), transparent);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            100% {
+                transform: translate(50%, 50%) rotate(360deg);
+            }
+        }
+
+        .rate-display {
+            text-align: center;
+            font-size: 0.9em;
+            color: #888;
+            margin: 15px 0;
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: -100%;
+            padding: 15px 25px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            transition: right 0.5s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            z-index: 1001;
+        }
+
+        .notification.active {
+            right: 20px;
+        }
+
+        /* Modal styling */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 2000;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.visible .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5em;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.8em;
+            cursor: pointer;
+        }
+
+        .modal-option-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 10px;
+            background: var(--background);
+            color: var(--text);
+            font-size: 1.1em;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .modal-option-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .info-content {
+            text-align: center;
+        }
+        
+        .info-content p {
+            margin-bottom: 15px;
+        }
+
+        .feedback-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .feedback-form textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--background);
+            color: var(--text);
+            resize: none;
+        }
+
+        .feedback-form button {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .feedback-form button:hover {
+            opacity: 0.8;
+        }
+
+        .user-id-text {
+            word-break: break-all;
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .title {
+                font-size: 1.8em;
+            }
+            
+            .key-btn {
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Firebase Imports -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      
+      setLogLevel('debug');
+
+      const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      let userId = null;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          userId = user.uid;
+          await loadUserTheme();
+          updateUserIdDisplay();
+        } else {
+          if (initialAuthToken) {
+            await signInWithCustomToken(auth, initialAuthToken);
+          } else {
+            await signInAnonymously(auth);
+          }
+        }
+      });
+      
+      const THEME_DOC_PATH = `artifacts/${appId}/users/{userId}/preferences/theme`;
+      const FEEDBACK_COLLECTION_PATH = `artifacts/${appId}/public/data/feedback`;
+      
+      function updateUserIdDisplay() {
+          const userIdElement = document.getElementById('user-id-display');
+          if (userIdElement && userId) {
+              userIdElement.textContent = `User ID: ${userId}`;
+          }
+      }
+
+      async function saveUserTheme(theme) {
+          if (!userId) {
+              console.error("User not authenticated. Cannot save theme.");
+              return;
+          }
+          const docRef = doc(db, THEME_DOC_PATH.replace('{userId}', userId));
+          try {
+              await setDoc(docRef, { theme: theme });
+              console.log("Theme saved to Firestore!");
+          } catch (e) {
+              console.error("Error saving theme: ", e);
+          }
+      }
+
+      async function loadUserTheme() {
+          if (!userId) {
+              console.error("User not authenticated. Cannot load theme.");
+              return;
+          }
+          const docRef = doc(db, THEME_DOC_PATH.replace('{userId}', userId));
+          try {
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                  const savedTheme = docSnap.data().theme;
+                  if (savedTheme === 'light') {
+                      document.body.classList.add('light-theme');
+                      currentTheme = 'light';
+                  } else {
+                      document.body.classList.remove('light-theme');
+                      currentTheme = 'dark';
+                  }
+                  updateThemeIcon();
+                  console.log("Theme loaded from Firestore:", savedTheme);
+              }
+          } catch (e) {
+              console.error("Error loading theme: ", e);
+          }
+      }
+
+      async function submitFeedback(feedback) {
+          if (!userId) {
+              console.error("User not authenticated. Cannot submit feedback.");
+              return;
+          }
+          const feedbackCollection = collection(db, FEEDBACK_COLLECTION_PATH);
+          try {
+              await addDoc(feedbackCollection, {
+                  userId: userId,
+                  feedbackText: feedback,
+                  timestamp: new Date()
+              });
+              console.log("Feedback submitted successfully!");
+          } catch (e) {
+              console.error("Error submitting feedback:", e);
+          }
+      }
+
+      window.firebaseApp = {
+        saveUserTheme,
+        loadUserTheme,
+        submitFeedback
+      };
+    </script>
+</head>
+<body>
+          <h1 class="title" data-i18n="title">محول العملات الذكي</h1>
+                      <p class="subtitle" data-i18n="subtitle">تصميم وتطوير زياد المحمد Design by Ziad </p>
+    <div class="container">
+        <!-- زر الإعدادات -->
+        <button class="settings-btn" id="settings-btn">⚙️</button>
+        
+        <div class="top-content glass-effect">
+            <span class="flag-top"></span>
+            <p class="random-message" id="random-message"></p>
+        </div>
+        
+        <div class="header">
+  
+
+        </div>
+
+        <div class="converter-box glass-effect">
+            <div class="currency-select">
+                <select id="from-currency"></select>
+                <select id="to-currency"></select>
+            </div>
+<div class="result-box glass-effect" id="result">
+           0.00
+       </div>
+
+       <div class="rate-display" id="rate-display">
+           <span data-i18n="rate_label">سعر الصرف:</span>
+           <span id="rate-value">جاري التحميل...</span>
+       </div>
+            <input type="text" class="amount-input" id="amount" data-i18n-placeholder="amount_placeholder" placeholder="المبلغ" readonly>
+
+            <div class="virtual-keyboard">
+                <button class="key-btn">3</button>
+                <button class="key-btn">2</button>
+                <button class="key-btn">1</button>
+                <button class="key-btn">6</button>
+                <button class="key-btn">5</button>
+                <button class="key-btn">4</button>
+                <button class="key-btn">9</button>
+                <button class="key-btn">8</button>
+                <button class="key-btn">7</button>
+                <button class="key-btn" id="clear">⌫</button>
+                <button class="key-btn">0</button>
+                <button class="key-btn">.</button>
+            </div>
+
+       
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Modals -->
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h2 data-i18n="settings_title">الإعدادات</h2>
+                <button class="close-btn" id="close-settings-modal">&times;</button>
+            </div>
+            
+            <p class="user-id-text" id="user-id-display"></p>
+            <button class="modal-option-btn" id="theme-switcher-btn">
+                <span id="theme-icon">☀️</span> <span data-i18n="theme_switcher_btn">الوضع النهاري/الليلي</span>
+            </button>
+            <button class="modal-option-btn" id="language-switcher-btn" data-i18n="language_btn">تبديل اللغة إلى الإنجليزية</button>
+            <button class="modal-option-btn" id="refresh-btn" data-i18n="refresh_btn">تحديث التطبيق</button>
+            <button class="modal-option-btn" id="rate-app-btn" data-i18n="rate_app_btn">تقييم التطبيق</button>
+            <button class="modal-option-btn" id="info-btn" data-i18n="info_btn">معلومات التطبيق</button>
+            <button class="modal-option-btn" id="feedback-btn" data-i18n="feedback_btn">إرسال ملاحظة</button>
+        </div>
+    </div>
+    
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h2 data-i18n="info_title">معلومات التطبيق</h2>
+                <button class="close-btn" id="close-info-modal">&times;</button>
+            </div>
+            <div class="info-content" data-i18n-html="info_text">
+                <p>هذا المحول الذكي للعملات يتيح لك تحويل العملات مع أسعار صرف حية. تم تطويره باستخدام HTML، CSS، JavaScript، وFirebase.</p>
+                <p>تم تصميم هذا التطبيق بواسطة زياد المحمد Design by Ziad </p>
+                <p>الإصدار: 1.2.0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h2 data-i18n="feedback_title">أرسل ملاحظاتك</h2>
+                <button class="close-btn" id="close-feedback-modal">&times;</button>
+            </div>
+            <form class="feedback-form" id="feedback-form">
+                <textarea id="feedback-text" data-i18n-placeholder="feedback_placeholder" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+                <button type="submit" data-i18n="submit_feedback_btn">إرسال</button>
+            </form>
+        </div>
+    </div>
+    
+
+    <script>
+        const currencies = {
+            "SYP": {name: "ليرة سورية", en_name: "Syrian Pound", flag:"🇸🇾"},
+            "USD": {name: "دولار أمريكي", en_name: "US Dollar", flag: "🇺🇸"},
+            "EUR": {name: "يورو", en_name: "Euro", flag: "🇪🇺"},
+            "TRY": {name: "ليرة تركية", en_name: "Turkish Lira", flag: "🇹🇷"},
+            "SAR": {name: "ريال سعودي", en_name: "Saudi Riyal", flag: "🇸🇦"},
+            "AED": {name: "درهم إماراتي", en_name: "Emirati Dirham", flag: "🇦🇪"},
+            "QAR": {name: "ريال قطري", en_name: "Qatari Riyal", flag: "🇶🇦"},
+            "KWD": {name: "دينار كويتي", en_name: "Kuwaiti Dinar", flag: "🇰🇼"}
+        };
+        
+        const religiousMessages = [
+            "لا تَيأسْ فَرُبَّما كَانَ القَدَرُ يَبْنيِ لَكَ حُلْماً أَجْمَلَ مِمَّا تَمنَّيتَ.",
+            "إنَّمَا الأُمورُ بِأَوقَاتِهَا، فصَبرٌ جَمِيلٌ واللهُ المُستَعَانُ.",
+            "وَلاَ تُعْجِبْكَ الدُّنْيَا فِي كُلِّ حَالٍ، فَإنَّهَا مَلِيئَةٌ بِالْعُبَرِ وَالْمَوَاعِظِ.",
+            "الْحَيَاةُ مَزْرَعَةٌ، فَازْرَعْ خَيْراً تَجِدْ حَصَادَاً طَيِّباً.",
+            "التَّوَاضُعُ زِينَةُ الْعَالِمِ وَالْحِكْمَةُ خُلُقُهُ.",
+            "لاَ تَحْزَنْ عَلَى شَيْءٍ فَاتَكَ، فَلَعَلَّ اللهَ أَرَادَ بِكَ خَيْراً.",
+            "اصْبِرْ عَلَى مَا أَصَابَكَ، فَإِنَّ فِي الصَّبْرِ خَيْراً كَثِيراً.",
+            "الإيمانُ ليسَ مجردَ كلماتٍ تُقالُ، بَلْ هُوَ عَمَلٌ يُصَدِّقُهُ.",
+            "تَفَكَّرْ فِي خَلْقِ اللهِ، تَزْدَدْ إِيمَاناً وَخُشُوعاً."
+        ];
+        
+        const englishReligiousMessages = [
+            "Don't despair, for destiny may be building a dream more beautiful than what you wished for.",
+            "Matters have their own times, so be patient, for God is the helper.",
+            "Do not be pleased with this world in all circumstances, for it is full of lessons and admonitions.",
+            "Life is a farm, so sow good deeds and you will find a good harvest.",
+            "Humility is the adornment of the wise, and wisdom is their character.",
+            "Do not grieve over something you have lost, for perhaps God intended good for you.",
+            "Be patient with what has befallen you, for there is much good in patience.",
+            "Faith is not just words to be said, but rather an action that confirms it.",
+            "Reflect on God's creation, and your faith and reverence will increase."
+        ];
+
+        const translations = {
+            ar: {
+                title: "محول العملات الذكي",
+                subtitle: "أداة متقدمة للتحويل بين العملات مع تحديث مباشر",
+                amount_placeholder: "المبلغ",
+                rate_label: "سعر الصرف:",
+                settings_title: "الإعدادات",
+                theme_switcher_btn: "الوضع النهاري/الليلي",
+                language_btn: "تبديل اللغة إلى الإنجليزية",
+                refresh_btn: "تحديث التطبيق",
+                rate_app_btn: "تقييم التطبيق",
+                info_btn: "معلومات التطبيق",
+                feedback_btn: "إرسال ملاحظة",
+                info_title: "معلومات التطبيق",
+                info_text: `
+                    <p>هذا المحول الذكي للعملات يتيح لك تحويل العملات مع أسعار صرف حية. تم تطويره باستخدام HTML، CSS، JavaScript، وFirebase.</p>
+                    <p>تم تصميم هذا التطبيق ليكون سهل الاستخدام وفعالاً.</p>
+                    <p>الإصدار: 1.2.0</p>
+                `,
+                feedback_title: "أرسل ملاحظاتك",
+                feedback_placeholder: "اكتب ملاحظاتك هنا...",
+                submit_feedback_btn: "إرسال",
+                notification_theme_light: "تم التبديل إلى الوضع النهاري",
+                notification_theme_dark: "تم التبديل إلى الوضع الليلي",
+                notification_fetch_fail: "فشل في جلب أسعار الصرف.",
+                notification_rate_thanks: "شكراً لتقييمك!",
+                notification_feedback_sent: "تم إرسال ملاحظاتك. شكراً لك!",
+                currency_name: (code) => currencies[code].name,
+                random_messages: religiousMessages
+            },
+            en: {
+                title: "Smart Currency Converter",
+                subtitle: "An advanced tool for converting currencies with live updates",
+                amount_placeholder: "Amount",
+                rate_label: "Exchange Rate:",
+                settings_title: "Settings",
+                theme_switcher_btn: "Light/Dark Mode",
+                language_btn: "Switch Language to Arabic",
+                refresh_btn: "Refresh App",
+                rate_app_btn: "Rate this App",
+                info_btn: "App Info",
+                feedback_btn: "Send Feedback",
+                info_title: "App Info",
+                info_text: `
+                    <p>This smart currency converter allows you to convert currencies with live exchange rates. It was developed using HTML, CSS, JavaScript, and Firebase.</p>
+                    <p>This application is designed to be user-friendly and efficient.</p>
+                    <p>Version: 1.2.0</p>
+                `,
+                feedback_title: "Send Feedback",
+                feedback_placeholder: "Type your feedback here...",
+                submit_feedback_btn: "Send",
+                notification_theme_light: "Switched to Light Mode",
+                notification_theme_dark: "Switched to Dark Mode",
+                notification_fetch_fail: "Failed to fetch exchange rates.",
+                notification_rate_thanks: "Thank you for rating!",
+                notification_feedback_sent: "Your feedback has been sent. Thank you!",
+                currency_name: (code) => currencies[code].en_name,
+                random_messages: englishReligiousMessages
+            }
+        };
+
+        let currentLanguage = 'ar';
+        let currentTheme = 'dark';
+        let exchangeRate = 0;
+        let amount = "";
+        let rates = {};
+
+        const fromSelect = document.getElementById('from-currency');
+        const toSelect = document.getElementById('to-currency');
+        const amountInput = document.getElementById('amount');
+        const resultBox = document.getElementById('result');
+        const rateDisplay = document.getElementById('rate-value');
+        const themeSwitcherBtn = document.getElementById('theme-switcher-btn');
+        const themeIcon = document.getElementById('theme-icon');
+        const randomMessageEl = document.getElementById('random-message');
+
+        // New elements for settings
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettingsModalBtn = document.getElementById('close-settings-modal');
+        const languageSwitcherBtn = document.getElementById('language-switcher-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const rateAppBtn = document.getElementById('rate-app-btn');
+        const infoBtn = document.getElementById('info-btn');
+        const feedbackBtn = document.getElementById('feedback-btn');
+        const infoModal = document.getElementById('info-modal');
+        const closeInfoModalBtn = document.getElementById('close-info-modal');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const closeFeedbackModalBtn = document.getElementById('close-feedback-modal');
+        const feedbackForm = document.getElementById('feedback-form');
+
+        function updateThemeIcon() {
+            themeIcon.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function displayRandomMessage() {
+            const messages = translations[currentLanguage].random_messages;
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            randomMessageEl.textContent = messages[randomIndex];
+        }
+
+        // Set the language and UI text based on the current language
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = translations[lang][key];
+            });
+            const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+            placeholders.forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = translations[lang][key];
+            });
+            const htmlContent = document.querySelectorAll('[data-i18n-html]');
+            htmlContent.forEach(el => {
+                const key = el.getAttribute('data-i18n-html');
+                el.innerHTML = translations[lang][key];
+            });
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            populateCurrencies();
+            updateResult();
+            displayRandomMessage();
+        }
+
+        // جلب أسعار الصرف من API
+        async function fetchRates() {
+            rateDisplay.textContent = translations[currentLanguage].rate_loading || "Loading...";
+            try {
+                const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+                const data = await response.json();
+                rates = data.rates;
+                console.log("Rates fetched:", rates);
+                updateRateDisplay();
+                updateResult();
+            } catch (error) {
+                console.error("Error fetching exchange rates:", error);
+                rateDisplay.textContent = translations[currentLanguage].notification_fetch_fail || "Failed to fetch.";
+                showNotification(translations[currentLanguage].notification_fetch_fail, 5000);
+            }
+        }
+
+        // تحديث سعر الصرف
+        function updateRateDisplay() {
+            const fromCurrency = fromSelect.value;
+            const toCurrency = toSelect.value;
+            if (fromCurrency === toCurrency) {
+                exchangeRate = 1;
+            } else if (fromCurrency === 'USD') {
+                exchangeRate = rates[toCurrency];
+            } else if (toCurrency === 'USD') {
+                exchangeRate = 1 / rates[fromCurrency];
+            } else {
+                exchangeRate = rates[toCurrency] / rates[fromCurrency];
+            }
+            
+            rateDisplay.textContent = `1 ${fromCurrency} = ${exchangeRate.toFixed(4)} ${toCurrency}`;
+        }
+
+        // تحديث النتيجة
+        function updateResult() {
+            const numericAmount = parseFloat(amount);
+            const finalResult = (amount.length === 0 || isNaN(numericAmount)) ? '0.00' : (numericAmount * exchangeRate).toFixed(2);
+            const toCurrency = toSelect.value;
+            const currencyName = translations[currentLanguage].currency_name(toCurrency);
+            resultBox.textContent = `${finalResult} ${currencyName}`;
+        }
+
+        // ملء قوائم العملات المنسدلة
+        function populateCurrencies() {
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+            Object.entries(currencies).forEach(([code, data]) => {
+                const option = document.createElement('option');
+                option.value = code;
+                option.innerHTML = `${data.flag} ${currentLanguage === 'ar' ? data.name : data.en_name}`;
+                fromSelect.appendChild(option.cloneNode(true));
+                toSelect.appendChild(option.cloneNode(true));
+            });
+            fromSelect.value = 'USD';
+            toSelect.value = 'SYP';
+        }
+
+        // عرض الإشعارات
+        function showNotification(text, duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            notification.classList.add('active');
+            setTimeout(() => notification.classList.remove('active'), duration);
+        }
+
+        // تهيئة التطبيق
+        populateCurrencies();
+        fetchRates();
+        displayRandomMessage();
+
+        // معالجة المدخلات
+        document.querySelectorAll('.key-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const key = e.target.textContent;
+                if (key === '⌫') {
+                    amount = amount.slice(0, -1);
+                } else if (key === '.' && amount.includes('.')) {
+                    return; // منع إضافة نقطة ثانية
+                } else if (amount.length < 15) { // Limit input length
+                    amount += key;
+                }
+                amountInput.value = amount;
+                updateResult();
+            });
+        });
+
+        // معالجة تغيير العملات
+        fromSelect.addEventListener('change', () => {
+            updateRateDisplay();
+            updateResult();
+        });
+        toSelect.addEventListener('change', () => {
+            updateRateDisplay();
+            updateResult();
+        });
+
+        // إدارة السمات
+        themeSwitcherBtn.addEventListener('click', () => {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.classList.toggle('light-theme', currentTheme === 'light');
+            updateThemeIcon();
+            const notificationText = currentTheme === 'dark' ? translations[currentLanguage].notification_theme_dark : translations[currentLanguage].notification_theme_light;
+            showNotification(notificationText);
+            if (window.firebaseApp) {
+                window.firebaseApp.saveUserTheme(currentTheme);
+            }
+        });
+
+        // Show/hide modals
+        function showModal(modal) {
+            modal.classList.add('visible');
+        }
+
+        function hideModal(modal) {
+            modal.classList.remove('visible');
+        }
+
+        // Settings modal logic
+        settingsBtn.addEventListener('click', () => {
+            showModal(settingsModal);
+        });
+        closeSettingsModalBtn.addEventListener('click', () => {
+            hideModal(settingsModal);
+        });
+
+        // Language switcher logic
+        languageSwitcherBtn.addEventListener('click', () => {
+            const newLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(newLang);
+            languageSwitcherBtn.textContent = translations[newLang].language_btn;
+            hideModal(settingsModal);
+        });
+
+        // Refresh app logic
+        refreshBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        // Rate app logic
+        rateAppBtn.addEventListener('click', () => {
+            showNotification(translations[currentLanguage].notification_rate_thanks);
+            hideModal(settingsModal);
+        });
+
+        // Info modal logic
+        infoBtn.addEventListener('click', () => {
+            hideModal(settingsModal);
+            showModal(infoModal);
+        });
+        closeInfoModalBtn.addEventListener('click', () => {
+            hideModal(infoModal);
+        });
+
+        // Feedback modal logic
+        feedbackBtn.addEventListener('click', () => {
+            hideModal(settingsModal);
+            showModal(feedbackModal);
+        });
+        closeFeedbackModalBtn.addEventListener('click', () => {
+            hideModal(feedbackModal);
+        });
+
+        feedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedbackText = document.getElementById('feedback-text').value;
+            if (feedbackText.trim() !== '') {
+                if (window.firebaseApp) {
+                    await window.firebaseApp.submitFeedback(feedbackText);
+                }
+                showNotification(translations[currentLanguage].notification_feedback_sent);
+                document.getElementById('feedback-text').value = '';
+                hideModal(feedbackModal);
+            }
+        });
+        
+    </script>
+    
+</body>
+</html>
+
+
